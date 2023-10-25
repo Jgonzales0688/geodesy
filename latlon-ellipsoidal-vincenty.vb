@@ -1,106 +1,62 @@
-Imports System.Math
+Imports System
 
-Module LatLonEllipsoidal_Vincenty
-    Const π As Double = Math.PI
-    Const ε As Double = Double.Epsilon
+Public Module VincentyDirectInverse
+    Private Const π As Double = Math.PI
+    Private Const ε As Double = Double.Epsilon
 
-    ''' <summary>
-    ''' Extends LatLonEllipsoidal with methods for calculating distances and bearings between points,
-    ''' and destination points given distances and initial bearings, accurate to within 0.5mm distance,
-    ''' 0.000015″ bearing.
-    ''' </summary>
     Public Class LatLonEllipsoidal_Vincenty
         Inherits LatLonEllipsoidal
 
-        Public Sub New(ByVal lat As Double, ByVal lon As Double, ByVal height As Double, ByVal datum As LatLonEllipsoidal_Datum)
-            MyBase.New(lat, lon, height, datum)
+        Public Sub New(latitude As Double, longitude As Double, Optional height As Double = 0, Optional datum As Datum = Nothing)
+            MyBase.New(latitude, longitude, height, datum)
         End Sub
 
-        ''' <summary>
-        ''' Returns the distance between ‘this’ point and destination point along a geodesic on the
-        ''' surface of the ellipsoid, using Vincenty inverse solution.
-        ''' </summary>
-        ''' <param name="point">Latitude/longitude of the destination point.</param>
-        ''' <returns>Distance in meters between points or NaN if failed to converge.</returns>
-        Public Function DistanceTo(ByVal point As LatLonEllipsoidal) As Double
+        Public Function DistanceTo(point As LatLonEllipsoidal) As Double
             Try
-                Dim dist As Double = Me.Inverse(point).Distance
+                Dim dist = Me.Inverse(point).Distance
                 Return Math.Round(dist, 3) ' round to 1mm precision
-            Catch e As Exception
-                If TypeOf e Is EvalError Then
+            Catch ex As Exception
+                If TypeOf ex Is EvalException Then
                     Return Double.NaN ' λ > π or failed to converge
                 End If
-                Throw e
+                Throw ex
             End Try
         End Function
 
-        ''' <summary>
-        ''' Returns the initial bearing to travel along a geodesic from ‘this’ point to the given point,
-        ''' using Vincenty inverse solution.
-        ''' </summary>
-        ''' <param name="point">Latitude/longitude of the destination point.</param>
-        ''' <returns>Initial bearing in degrees from north (0°..360°) or NaN if failed to converge.</returns>
-        Public Function InitialBearingTo(ByVal point As LatLonEllipsoidal) As Double
+        Public Function InitialBearingTo(point As LatLonEllipsoidal) As Double
             Try
-                Dim brng As Double = Me.Inverse(point).InitialBearing
+                Dim brng = Me.Inverse(point).InitialBearing
                 Return Math.Round(brng, 7) ' round to 0.001″ precision
-            Catch e As Exception
-                If TypeOf e Is EvalError Then
+            Catch ex As Exception
+                If TypeOf ex Is EvalException Then
                     Return Double.NaN ' λ > π or failed to converge
                 End If
-                Throw e
+                Throw ex
             End Try
         End Function
 
-        ''' <summary>
-        ''' Returns the final bearing having traveled along a geodesic from ‘this’ point to the given
-        ''' point, using Vincenty inverse solution.
-        ''' </summary>
-        ''' <param name="point">Latitude/longitude of the destination point.</param>
-        ''' <returns>Final bearing in degrees from north (0°..360°) or NaN if failed to converge.</returns>
-        Public Function FinalBearingTo(ByVal point As LatLonEllipsoidal) As Double
+        Public Function FinalBearingTo(point As LatLonEllipsoidal) As Double
             Try
-                Dim brng As Double = Me.Inverse(point).FinalBearing
+                Dim brng = Me.Inverse(point).FinalBearing
                 Return Math.Round(brng, 7) ' round to 0.001″ precision
-            Catch e As Exception
-                If TypeOf e Is EvalError Then
+            Catch ex As Exception
+                If TypeOf ex Is EvalException Then
                     Return Double.NaN ' λ > π or failed to converge
                 End If
-                Throw e
+                Throw ex
             End Try
         End Function
 
-        ''' <summary>
-        ''' Returns the destination point having traveled the given distance along a geodesic given by
-        ''' initial bearing from ‘this’ point, using Vincenty direct solution.
-        ''' </summary>
-        ''' <param name="distance">Distance traveled along the geodesic in meters.</param>
-        ''' <param name="initialBearing">Initial bearing in degrees from north.</param>
-        ''' <returns>Destination point.</returns>
-        Public Function DestinationPoint(ByVal distance As Double, ByVal initialBearing As Double) As LatLonEllipsoidal
-            Dim result = Me.Direct(distance, initialBearing)
-            Return result.Point
+        Public Function DestinationPoint(distance As Double, initialBearing As Double) As LatLonEllipsoidal
+            Return Me.Direct(distance, initialBearing).Point
         End Function
 
-        ''' <summary>
-        ''' Returns the final bearing having traveled along a geodesic given by initial bearing for a
-        ''' given distance from ‘this’ point, using Vincenty direct solution.
-        ''' </summary>
-        ''' <param name="distance">Distance traveled along the geodesic in meters.</param>
-        ''' <param name="initialBearing">Initial bearing in degrees from north.</param>
-        ''' <returns>Final bearing in degrees from north (0°..360°).</returns>
-        Public Function FinalBearingOn(ByVal distance As Double, ByVal initialBearing As Double) As Double
-            Dim brng As Double = Me.Direct(distance, initialBearing).FinalBearing
+        Public Function FinalBearingOn(distance As Double, initialBearing As Double) As Double
+            Dim brng = Me.Direct(distance, initialBearing).FinalBearing
             Return Math.Round(brng, 7) ' round to 0.001″ precision
         End Function
 
-        ''' <summary>
-        ''' Returns the point at the given fraction between ‘this’ point and the given point.
-        ''' </summary>
-        ''' <param name="point">Latitude/longitude of the destination point.</param>
-        ''' <param name="fraction">Fraction between the two points (0 = this point, 1 = specified point).</param>
-        ''' <returns>Intermediate point between this point and destination point.</returns>
-        Public Function IntermediatePointTo(ByVal point As LatLonEllipsoidal, ByVal fraction As Double) As LatLonEllipsoidal
+        Public Function IntermediatePointTo(point As LatLonEllipsoidal, fraction As Double) As LatLonEllipsoidal
             If fraction = 0 Then
                 Return Me
             ElseIf fraction = 1 Then
@@ -118,27 +74,29 @@ Module LatLonEllipsoidal_Vincenty
             End If
         End Function
 
-        ' Vincenty direct calculation
-        Private Function Direct(ByVal distance As Double, ByVal initialBearing As Double) As DirectResult
+        Private Function Direct(distance As Double, initialBearing As Double) As Object
             If Double.IsNaN(distance) Then
                 Throw New ArgumentException("Invalid distance")
             End If
+
             If distance = 0 Then
-                Return New DirectResult(Me, Double.NaN, 0)
+                Return New With {.Point = Me, .FinalBearing = Double.NaN, .Iterations = 0}
             End If
+
             If Double.IsNaN(initialBearing) Then
                 Throw New ArgumentException("Invalid bearing")
             End If
+
             If Me.Height <> 0 Then
                 Throw New ArgumentOutOfRangeException("Point must be on the surface of the ellipsoid")
             End If
 
-            Dim φ1 = Me.Latitude.ToRadians()
-            Dim λ1 = Me.Longitude.ToRadians()
-            Dim α1 = initialBearing.ToRadians()
+            Dim φ1 = MathExtensions.ToRadians(Me.Latitude)
+            Dim λ1 = MathExtensions.ToRadians(Me.Longitude)
+            Dim α1 = MathExtensions.ToRadians(initialBearing)
             Dim s = distance
 
-            Dim ellipsoid = If(Me.Datum IsNot Nothing, Me.Datum.Ellipsoid, LatLonEllipsoidal.ellipsoids.WGS84)
+            Dim ellipsoid = If(Me.Datum IsNot Nothing, Me.Datum.Ellipsoid, LatLonEllipsoidal.Ellipsoids.WGS84)
             Dim a = ellipsoid.A
             Dim b = ellipsoid.B
             Dim f = ellipsoid.F
@@ -148,3 +106,68 @@ Module LatLonEllipsoidal_Vincenty
 
             Dim tanU1 = (1 - f) * Math.Tan(φ1)
             Dim cosU1 = 1 / Math.Sqrt(1 + tanU1 * tanU1)
+            Dim sinU1 = tanU1 * cosU1
+            Dim σ1 = Math.Atan2(tanU1, cosα1)
+            Dim sinα = cosU1 * sinα1
+            Dim cosSqα = 1 - sinα * sinα
+            Dim uSq = cosSqα * (a * a - b * b) / (b * b)
+            Dim A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)))
+            Dim B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)))
+
+            Dim σ = s / (b * A)
+            Dim sinσ As Double = 0
+            Dim cosσ As Double = 0
+            Dim cos2σₘ As Double = 0
+            Dim σʹ As Double = 0
+            Dim iterations As Integer = 0
+
+            Do
+                cos2σₘ = Math.Cos(2 * σ1 + σ)
+                sinσ = Math.Sin(σ)
+                cosσ = Math.Cos(σ)
+                Dim Δσ = B * sinσ * (cos2σₘ + B / 4 * (cosσ * (-1 + 2 * cos2σₘ * cos2σₘ) - B / 6 * cos2σₘ * (-3 + 4 * sinσ * sinσ) * (-3 + 4 * cos2σₘ * cos2σₘ)))
+                σʹ = σ
+                σ = s / (b * A) + Δσ
+            Loop While Math.Abs(σ - σʹ) > 1e-12 AndAlso iterations < 100
+
+            If iterations >= 100 Then
+                Throw New EvalException("Vincenty formula failed to converge")
+            End If
+
+            Dim x = sinU1 * sinσ - cosU1 * cosσ * cosα1
+            Dim φ2 = Math.Atan2(sinU1 * cosσ + cosU1 * sinσ * cosα1, (1 - f) * Math.Sqrt(sinα * sinα + x * x))
+            Dim λ = Math.Atan2(sinσ * sinα1, cosU1 * cosσ - sinU1 * sinσ * cosα1)
+            Dim C = f / 16 * cosSqα * (4 + f * (4 - 3 * cosSqα))
+            Dim L = λ - (1 - C) * f * sinα * (σ + C * sinσ * (cos2σₘ + C * cosσ * (-1 + 2 * cos2σₘ * cos2σₘ)))
+            Dim λ2 = λ1 + L
+            Dim α2 = Math.Atan2(sinα, -x)
+
+            Dim destinationPoint = New LatLonEllipsoidal_Vincenty(MathExtensions.ToDegrees(φ2), MathExtensions.ToDegrees(λ2), 0, Me.Datum)
+
+            Return New With {.Point = destinationPoint, .FinalBearing = Dms.Wrap360(MathExtensions.ToDegrees(α2)), .Iterations = iterations}
+        End Function
+    End Class
+End Module
+
+Public Class EvalException
+    Inherits Exception
+    Public Sub New(message As String)
+        MyBase.New(message)
+    End Sub
+End Class
+
+Public Class MathExtensions
+    Public Shared Function ToRadians(degrees As Double) As Double
+        Return degrees * Math.PI / 180
+    End Function
+
+    Public Shared Function ToDegrees(radians As Double) As Double
+        Return radians * 180 / Math.PI
+    End Function
+End Class
+
+Public Class Dms
+    Public Shared Function Wrap360(degrees As Double) As Double
+        Return If(degrees < 0, (degrees Mod 360) + 360, degrees Mod 360)
+    End Function
+End Class
