@@ -5,8 +5,8 @@
 /* www.movable-type.co.uk/scripts/geodesy-library.html#latlon-nvector-spherical                   */
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 
-import Vector3d from './vector3d.js';
-import Dms      from './dms.js';
+import Vector3d from '../vector3d.js';
+import Dms      from '../dms.js';
 
 const π = Math.PI;
 

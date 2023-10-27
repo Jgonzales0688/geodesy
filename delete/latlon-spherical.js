@@ -5,7 +5,7 @@
 /* www.movable-type.co.uk/scripts/geodesy-library.html#latlon-spherical                           */
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 
-import Dms from './dms.js';
+import Dms from '../dms.js';
 
 const π = Math.PI;
 
