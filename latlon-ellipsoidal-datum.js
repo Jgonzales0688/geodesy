@@ -1,4 +1,4 @@
-import LatLonEllipsoidal, { Cartesian, Dms } from './latlon-ellips.js';
+import LatLonEllipsoidal, { Cartesian, Dms } from './latlon-ellipsoidal.js';
 
 //Ellipsoid parameters; exposed through static getter below.
 

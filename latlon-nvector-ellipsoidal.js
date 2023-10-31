@@ -1,4 +1,4 @@
-import LatLonEllipsoidal, { Cartesian, Vector3d, Dms } from './latlon_ellips.js';
+import LatLonEllipsoidal, { Cartesian, Vector3d, Dms } from './latlon-ellipsoidal.js';
 
 /* LatLon_NvectorEllipsoidal - - - - - - - - - - - - - - - - - - - */
 

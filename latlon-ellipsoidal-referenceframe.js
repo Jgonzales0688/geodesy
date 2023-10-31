@@ -1,6 +1,6 @@
 /* Geodesy tools for conversions between reference frames             (c) Chris Veness 2016-2019  */
 
-import LatLonEllipsoidal, { Cartesian, Dms } from './latlon-ellips.js';
+import LatLonEllipsoidal, { Cartesian, Dms } from './latlon-ellipsoidal.js';
 
 //ellipsoid parameters- exposed through static getter below
 const ellipsoids = {

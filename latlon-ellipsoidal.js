@@ -1,5 +1,5 @@
-import Dms from './dms_ellips.js';
-import Vector3d from './vector3d_ellips.js';
+import Dms from './dms.js';
+import Vector3d from './vector3d.js';
 
 //ellipsoid parametes; exposted through static getter below - only ellipsoid defined in WGS84, for use in utm/mgrs, vincenty, nvector
 const ellipsoids = {

@@ -1,4 +1,4 @@
-import LatLonEllipsoidal, { Dms } from './latlon_ellips.js';
+import LatLonEllipsoidal, { Dms } from './latlon_ellipsoidal.js';
 
 const π = Math.PI;
 const ε = Number.EPSILON;

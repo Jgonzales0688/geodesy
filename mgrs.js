@@ -1,4 +1,4 @@
-import Utm, { LatLon as LatLonEllipsoidal, Dms } from './utm_ellips.js';
+import Utm, { LatLon as LatLonEllipsoidal, Dms } from './utm.js';
 
 //latitude bandsC..X 8 degrees eachm covering 80 degrees south to 84 degrees north
 const latBands = 'CDEFGHJKLMNPQRSTUVWXX'; // X is repeated for 80-84°N
